@@ -1,0 +1,448 @@
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Site</title>
+    <style>
+        table.t1 {
+            border-top: 1px #990000 dotted;
+            border-bottom: 1px #990000 dotted;
+        }
+
+        th.t1 {
+            border-left: 1px #990000 dotted;
+            border-right: 1px #990000 dotted;
+        }
+
+        td.t1 {
+            border-top: 1px #009900 dotted;
+            border-left: 1px #009900 dotted;
+            border-right: 1px #009900 dotted;
+        }
+
+        table.t2 {
+            border-top: 1px #6311C6 dotted;
+            border-bottom: 1px #6311C6 dotted;
+        }
+
+        th.t2 {
+            border-left: 1px #6311C6 dotted;
+            border-right: 1px #6311C6 dotted;
+        }
+
+        td.t2 {
+            border-top: 1px #01ACBA dotted;
+            border-left: 1px #01ACBA dotted;
+            border-right: 1px #01ACBA dotted;
+        }
+    </style>
+
+</head>
+<!-- js: code run 848 beta-gun -->
+<body>
+
+<table width="300" class="t1">
+    <tr>
+        <th class="t1">1</th>
+        <th class="t1">2</th>
+        <th class="t1">3</th>
+    </tr>
+    <tr>
+        <td class="t1">Vasya</td>
+        <td class="t1">28.34</td>
+        <td class="t1">-15.48</td>
+    </tr>
+    <tr>
+        <td class="t1">Petya</td>
+        <td class="t1">140.02</td>
+        <td class="t1">29</td>
+    </tr>
+    <tr>
+        <td class="t1">Masha</td>
+        <td class="t1">-2.09</td>
+        <td class="t1">-37.03</td>
+    </tr>
+</table>
+
+<div id="allButtons">
+    <button id="b1" type="button"> появится копия исходной таблицы, но с порядком полей: 1, 3, 2. Применить для новой
+        таблицы стили t2
+    </button>
+    <br/>
+    <button id="b2" type="button">появится копия исходной таблицы, но с дополнительным полем 4, в котором будет сумма
+        полей 2 и 3. Применить для новой таблицы стили t2
+    </button>
+    <br/>
+    <button id="b3" type="button"> сохранится в cookie ключ bbb со значением, равным 43</button>
+    <br/>
+    <button id="b4" type="button"> сформируется XMLHttp-запрос на сайт «http://domain.com»,</button>
+    <br/>
+    <input type="button" style="display: block" id="b5"
+           value="появится iframe, внутри которого будет загружен site.html(без каких-либо параметров) с исходной таблицей,  у которой будут невидимыми строки с отрицательными числами в поле 3.">
+    <br/>
+    <input type="button" style="display: block" id="b6"
+           value="появится iframe, внутри которого будет загружен site.html(без каких-либо параметров) с исходной таблицей,  у которой будут невидимыми строки, у которых поле 1 равно «Petya».">
+    <br/>
+    <button id="b7" type="button">будет найден комментарий, начинающийся</button>
+    <br/> <br/> <br/>
+    <button id="b8" type="button">Удалить из cookie значение 43</button>
+    <br/><br/><br/><br/><br/><br/>
+</div>
+
+
+<script>
+    var taskModule = (function () {
+
+        var originalTable = document.getElementsByTagName('table')[0];
+        var cookieName = 'bbb';
+        var cookieIteration = 0;
+        var hideCellValueOne = 'Petya';
+
+        var clickById = function (id, func) {
+            document.getElementById(id).onclick = function () {
+                func();
+            };
+        };
+
+        var firstButton = function () {
+            var cloneTable = _getClonedTable();
+            _changeClasses(cloneTable);
+            _swapColumns(cloneTable);
+            document.body.insertBefore(cloneTable, document.body.lastChild);
+            _detectOnceCookie(cookieName);
+        };
+
+        var secondButton = function () {
+            var cloneTable = _getClonedTable();
+            _changeClasses(cloneTable);
+            document.body.insertBefore(cloneTable, document.body.lastChild);
+            _detectOnceCookie(cookieName);
+            _addColumn(cloneTable);
+        };
+
+        var thirdButton = function () {
+            document.cookie = cookieName + '=43';
+        };
+
+        var fourthButton = function () {
+            var index;
+            var dataToSend = [];
+            for (index in originalTable.rows) {
+                if (originalTable.rows[index].nodeName !== 'TR') {
+                    continue;
+                }
+                var sum = _add(
+                    parseFloat(originalTable.rows[index].cells[2].innerHTML),
+                    parseFloat(originalTable.rows[index].cells[1].innerHTML)
+                );
+                if (sum > 5) {
+                    dataToSend.push({
+                        p1: originalTable.rows[index].cells[0].innerHTML,
+                        ps: sum
+                    })
+                }
+            }
+            function createCORSRequest(method, url) {
+                var xhr = new XMLHttpRequest();
+                if ("withCredentials" in xhr) {
+
+                    xhr.open(method, url, true);
+                } else if (typeof XDomainRequest != "undefined") {
+                    xhr = new XDomainRequest();
+                    xhr.open(method, url);
+                } else {
+                    xhr = null;
+                }
+                return xhr;
+            }
+
+            alert(JSON.stringify(dataToSend));
+            var xhr = createCORSRequest('POST', 'http://domain.com');
+
+            xhr.send(JSON.stringify(dataToSend));
+
+            if (xhr.status !== 200) {
+                console.log(xhr);
+            } else {
+                alert(xhr.responseText);
+            }
+        };
+
+        var fifthButton = function () {
+            function ruleFormatIframe(iframeOriginalTable) {
+                var index;
+                var hideCell = 2;
+                for (index in iframeOriginalTable.rows) {
+                    if (iframeOriginalTable.rows[index].nodeName !== 'TR' || index === '0') {
+                        continue;
+                    }
+                    if (parseFloat(iframeOriginalTable.rows[index].cells[hideCell].innerHTML) < 0) {
+                        iframeOriginalTable.rows[index].className = 'hide';
+                    }
+                }
+            }
+
+            _formatIframe(ruleFormatIframe);
+        };
+
+        var sixthButton = function () {
+            function ruleFormatIframe(iframeOriginalTable) {
+                var index;
+                var hideCell = 0;
+                for (index in iframeOriginalTable.rows) {
+                    if (iframeOriginalTable.rows[index].nodeName !== 'TR' || index === '0') {
+                        continue;
+                    }
+                    if (iframeOriginalTable.rows[index].cells[hideCell].innerHTML === hideCellValueOne) {
+                        iframeOriginalTable.rows[index].className = 'hide';
+                    }
+                }
+            }
+
+            _formatIframe(ruleFormatIframe);
+        };
+
+        var seventhButton = function () {
+            function filterNone() {
+                return NodeFilter.FILTER_ACCEPT;
+            }
+
+            function getAllComments(rootElem) {
+                var comments = [];
+                var iterator = document.createNodeIterator(rootElem, NodeFilter.SHOW_COMMENT, filterNone, false);
+                var curNode;
+                while (curNode = iterator.nextNode()) {
+                    comments.push(curNode.nodeValue);
+                }
+                return comments;
+            }
+
+            getAllComments(document).forEach(function (el) {
+                var regExp = /js:/i;
+                alert(el.match(regExp).input.split('js: ')[1]);
+            });
+        };
+
+        var eighthButton = function () {
+            document.cookie = cookieName + '=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        };
+
+        /*private methods*/
+        /*table methods*/
+        function _getClonedTable() {
+            var cloneTable = originalTable.cloneNode(true);
+            cloneTable.className = 't2';
+            return cloneTable;
+        }
+
+        function _changeClasses(element) {
+            if (!element.childNodes.length) {
+                return;
+            }
+            element.childNodes.forEach(function (element) {
+                element.className = 't2';
+                _changeClasses(element);
+            });
+        }
+
+        function _swapColumns(table) {
+            var index;
+            for (index in table.rows) {
+                var last = table.rows[index].lastElementChild;
+                var first = table.rows[index].firstElementChild;
+                if (first === undefined || last === undefined) {
+                    return;
+                }
+                first.parentNode.insertBefore(last, _nextElement(first));
+            }
+        }
+
+        function _addColumn(table) {
+            var index;
+            for (index in table.rows) {
+                var last = table.rows[index].lastElementChild;
+                if (last === undefined) {
+                    return;
+                }
+                if (index === '0') {
+                    createNewElement('th', 4);
+                    continue;
+                }
+                var prevLast = _prevElement(last);
+                createNewElement('td', _add(last.innerHTML, prevLast.innerHTML))
+            }
+
+            function createNewElement(tag, data) {
+                var newElement = document.createElement(tag);
+                newElement.innerHTML = data;
+                newElement.className = 't2';
+                table.rows[index].appendChild(newElement);
+            }
+        }
+
+        /*table methods end*/
+        /*math methods*/
+        function _add(a, b) {
+            return (parseInt(a * 100) + parseInt(b * 100)) / 100
+        }
+
+        function _sub(a, b) {
+            return (parseInt(a * 100) - parseInt(b * 100)) / 100
+        }
+
+        /*math methods end*/
+        /*cookie task*/
+        function _detectOnceCookie(name) {
+            if (cookieIteration === 0) {
+                var tables = document.getElementsByTagName('table');
+                var index;
+                for (index in tables) {
+                    _detectCookie(tables[index], name)
+                }
+            }
+        }
+
+        function _detectCookie(table, name) {
+
+            function getCookie(name) {
+                var matches = document.cookie.match(new RegExp(
+                    "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+                ));
+                return matches ? decodeURIComponent(matches[1]) : undefined;
+            }
+
+            function changeTableValue(table, value) {
+                var rowIndex;
+                for (rowIndex in table.rows) {
+                    if (rowIndex === '0') {
+                        continue;
+                    }
+                    if (table.rows[rowIndex].nodeName !== 'TR') {
+                        continue;
+                    }
+                    table.rows[rowIndex].childNodes.forEach(function (el) {
+                        if (!isNaN(parseFloat(el.innerHTML))) {
+                            el.innerHTML = _sub(el.innerHTML, value);
+                        }
+                    });
+                }
+            }
+
+            var cookieValue = getCookie(name);
+
+            if (cookieValue) {
+                changeTableValue(table, cookieValue);
+                cookieIteration++
+            }
+        }
+
+        /*cookie task end*/
+        /*iframes*/
+        function _createIframe(src) {
+            src = src || 'javascript:false';
+            var iframe = document.createElement('iframe');
+            iframe.src = src;
+            document.body.appendChild(iframe);
+            return iframe;
+        }
+
+        function _addHideStyle(iframeDoc) {
+            var style = iframeDoc.createElement("style");
+            style.appendChild(iframeDoc.createTextNode(""));
+            iframeDoc.head.appendChild(style);
+            style.innerHTML = ".hide { display: none; }";
+
+            return style;
+        }
+
+        function _formatIframe(func) {
+            var newIframe = _createIframe(document.location.href + "?hack=on:)");
+
+            newIframe.onload = function () {
+                var iframeDoc = newIframe.contentWindow.document;
+
+                var iframeOriginalTable = iframeDoc.getElementsByTagName('table')[0];
+
+                _addHideStyle(iframeDoc);
+
+                func(iframeOriginalTable);
+            }
+        }
+
+        /*end iframes*/
+        /*Polyfills*/
+        function _prevElement(el) {
+            if (el === undefined) {
+                return;
+            }
+            if (el.previousElementSibling) return el.previousElementSibling;
+            do {
+                el = el.previousSibling
+            } while (el && el.nodeType !== 1);
+            return el;
+        }
+
+        function _nextElement(el) {
+            if (el === undefined) {
+                return;
+            }
+            if (el.nextElementSibling) return el.nextElementSibling;
+            do {
+                el = el.nextSibling
+            } while (el && el.nodeType !== 1);
+            return el;
+        }
+
+        (function (constructor) {
+            if (constructor &&
+                constructor.prototype &&
+                constructor.prototype.lastElementChild === null) {
+                Object.defineProperty(constructor.prototype, 'lastElementChild', {
+                    get: function () {
+                        var node, nodes = this.childNodes, i = nodes.length - 1;
+                        while (node = nodes[i--]) {
+                            if (node.nodeType === 1) {
+                                return node;
+                            }
+                        }
+                        return null;
+                    }
+                });
+            }
+        })(window.Node || window.Element);
+
+        (function (constructor) {
+            if (!('firstElementChild' in document.documentElement)) {
+                Object.defineProperty(Element.prototype, 'firstElementChild', {
+                    get: function () {
+                        for (var nodes = this.children, n, i = 0, l = nodes.length; i < l; ++i)
+                            if (n = nodes[i], 1 === n.nodeType) return n;
+                        return null;
+                    }
+                });
+            }
+        })(window.Node || window.Element);
+
+        return {
+            clickById: clickById,
+            first: firstButton,
+            second: secondButton,
+            third: thirdButton,
+            fourth: fourthButton,
+            fifth: fifthButton,
+            sixth: sixthButton,
+            seventh: seventhButton,
+            eighth: eighthButton
+        }
+    })();
+
+    taskModule.clickById('b1', taskModule.first);
+    taskModule.clickById('b2', taskModule.second);
+    taskModule.clickById('b3', taskModule.third);
+    taskModule.clickById('b4', taskModule.fourth);
+    taskModule.clickById('b5', taskModule.fifth);
+    taskModule.clickById('b6', taskModule.sixth);
+    taskModule.clickById('b7', taskModule.seventh);
+    taskModule.clickById('b8', taskModule.eighth);
+</script>
+</body>
+</html>
