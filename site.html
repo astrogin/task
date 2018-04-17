@@ -325,14 +325,6 @@
             iframeDoc.head.appendChild(style);
             style.innerHTML = ".hide { display: none; }";
 
-            var script = iframeDoc.createElement('script');
-            script.addEventListener('load', postLoadFunction);
-            document.head.appendChild(script);
-
-            function postLoadFunction() {
-                alert('hello');
-            }
-
             return style;
         }
         function _ruleFifthFormatIframe(iframeOriginalTable) {
@@ -369,7 +361,7 @@
 
                     _addHideStyle(document);
 
-                    _ruleFifthFormatIframe(iframeOriginalTable);
+                    _ruleSixFormatIframe(iframeOriginalTable);
                 }
 
                 if(locationIframe === 'sixth') {
@@ -377,7 +369,7 @@
 
                     _addHideStyle(document);
 
-                    _ruleSixFormatIframe(iframeOriginal);
+                    _ruleFifthFormatIframe(iframeOriginal);
                 }
             }
         })();
