@@ -168,37 +168,11 @@
         };
 
         var fifthButton = function () {
-            function ruleFormatIframe(iframeOriginalTable) {
-                var index;
-                var hideCell = 2;
-                for (index in iframeOriginalTable.rows) {
-                    if (iframeOriginalTable.rows[index].nodeName !== 'TR' || index === '0') {
-                        continue;
-                    }
-                    if (parseFloat(iframeOriginalTable.rows[index].cells[hideCell].innerHTML) < 0) {
-                        iframeOriginalTable.rows[index].className = 'hide';
-                    }
-                }
-            }
-
-            _formatIframe(ruleFormatIframe);
+            _createIframe(document.location.href + "?fifth");
         };
 
         var sixthButton = function () {
-            function ruleFormatIframe(iframeOriginalTable) {
-                var index;
-                var hideCell = 0;
-                for (index in iframeOriginalTable.rows) {
-                    if (iframeOriginalTable.rows[index].nodeName !== 'TR' || index === '0') {
-                        continue;
-                    }
-                    if (iframeOriginalTable.rows[index].cells[hideCell].innerHTML === hideCellValueOne) {
-                        iframeOriginalTable.rows[index].className = 'hide';
-                    }
-                }
-            }
-
-            _formatIframe(ruleFormatIframe);
+            _createIframe(document.location.href + "?sixth");
         };
 
         var seventhButton = function () {
@@ -351,22 +325,63 @@
             iframeDoc.head.appendChild(style);
             style.innerHTML = ".hide { display: none; }";
 
+            var script = iframeDoc.createElement('script');
+            script.addEventListener('load', postLoadFunction);
+            document.head.appendChild(script);
+
+            function postLoadFunction() {
+                alert('hello');
+            }
+
             return style;
         }
-
-        function _formatIframe(func) {
-            var newIframe = _createIframe(document.location.href + "?hack=on:)");
-
-            newIframe.onload = function () {
-                var iframeDoc = newIframe.contentWindow.document;
-
-                var iframeOriginalTable = iframeDoc.getElementsByTagName('table')[0];
-
-                _addHideStyle(iframeDoc);
-
-                func(iframeOriginalTable);
+        function _ruleFifthFormatIframe(iframeOriginalTable) {
+            var index;
+            var hideCell = 2;
+            for (index in iframeOriginalTable.rows) {
+                if (iframeOriginalTable.rows[index].nodeName !== 'TR' || index === '0') {
+                    continue;
+                }
+                if (parseFloat(iframeOriginalTable.rows[index].cells[hideCell].innerHTML) < 0) {
+                    iframeOriginalTable.rows[index].className = 'hide';
+                }
             }
         }
+
+        function _ruleSixFormatIframe(iframeOriginalTable) {
+            var index;
+            var hideCell = 0;
+            for (index in iframeOriginalTable.rows) {
+                if (iframeOriginalTable.rows[index].nodeName !== 'TR' || index === '0') {
+                    continue;
+                }
+                if (iframeOriginalTable.rows[index].cells[hideCell].innerHTML === hideCellValueOne) {
+                    iframeOriginalTable.rows[index].className = 'hide';
+                }
+            }
+        }
+
+        (function () {
+            if (document.location.href.split('?')[1]) {
+                var locationIframe = document.location.href.split('?')[1];
+                if(locationIframe === 'fifth') {
+                    var iframeOriginalTable = document.getElementsByTagName('table')[0];
+
+                    _addHideStyle(document);
+
+                    _ruleFifthFormatIframe(iframeOriginalTable);
+                }
+
+                if(locationIframe === 'sixth') {
+                    var iframeOriginal = document.getElementsByTagName('table')[0];
+
+                    _addHideStyle(document);
+
+                    _ruleSixFormatIframe(iframeOriginal);
+                }
+            }
+        })();
+
 
         /*end iframes*/
         /*Polyfills*/
